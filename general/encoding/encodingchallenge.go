@@ -44,56 +44,61 @@ func EncodingChallenge() string {
 	}
 	defer conn.Close()
 
-	for i := 0; i < 10; i++ {
-		fmt.Println("sent message to server:", cmd)
+	// for i := 0; i < 10; i++ {
+	fmt.Println("sent message to server:", cmd)
 
-		msg, err := utils.DoDial(conn, cmd)
-		if err != nil {
-			fmt.Println("got empty message from server:", msg)
-			continue
-		}
-
-		fmt.Println("got message from server:", msg)
-
-		if msg == "" {
-			// fmt.Println("HERE!")
-			// i -= 1
-			continue
-		}
-		// fmt.Println("cmd =", cmd)
-
-		var encodedResponse Encoded
-		err = json.Unmarshal([]byte(msg), &encodedResponse)
-		if err != nil {
-			return fmt.Errorf("cannot unmarshal server response: %s", err).Error()
-		}
-
-		decoded := Decoded{}
-
-		switch encodedResponse.T {
-		case base64Encoding:
-			decoded.Msg = base64Decode(encodedResponse.Msg.(string))
-		case hexEncoding:
-			decoded.Msg = hexDecode(encodedResponse.Msg.(string))
-		case rot13Encoding:
-			decoded.Msg = rot13Decode(encodedResponse.Msg.(string))
-		case utf8Encoding:
-			decoded.Msg = utf8Decode(encodedResponse.Msg.([]interface{}))
-		case bigintEncoding:
-			decoded.Msg = bigintDecode(encodedResponse.Msg.(string))
-		}
-
-		response, err := json.Marshal(decoded)
-		if err != nil {
-			// log.Println("BAR", msg)
-			return fmt.Errorf("cannot marshal decoded response: %s", err).Error()
-		}
-
-		// fmt.Println("asd", string(response))
-		// fmt.Println(decoded.Msg)
-		// fmt.Println(string(response))
-		cmd = string(response)
+	msg, err := utils.DoDial(conn, cmd)
+	if err != nil {
+		fmt.Println("got empty message from server:", msg)
+		// continue
 	}
+
+	fmt.Println("got message from server:", msg)
+
+	if msg == "" {
+		// fmt.Println("HERE!")
+		// i -= 1
+		// continue
+	}
+	// fmt.Println("cmd =", cmd)
+
+	var encodedResponse Encoded
+	err = json.Unmarshal([]byte(msg), &encodedResponse)
+	if err != nil {
+		return fmt.Errorf("cannot unmarshal server response: %s", err).Error()
+	}
+
+	decoded := `{"decoded":"`
+
+	switch encodedResponse.T {
+	case base64Encoding:
+		decoded += base64Decode(encodedResponse.Msg.(string))
+	case hexEncoding:
+		decoded += hexDecode(encodedResponse.Msg.(string))
+	case rot13Encoding:
+		decoded += rot13Decode(encodedResponse.Msg.(string))
+	case utf8Encoding:
+		decoded += utf8Decode(encodedResponse.Msg.([]interface{}))
+	case bigintEncoding:
+		decoded += bigintDecode(encodedResponse.Msg.(string))
+	}
+
+	decoded += `"}`
+
+	// fmt.Println("asd", string(response))
+	// fmt.Println(decoded.Msg)
+	// fmt.Println(string(response))
+	// }
+
+	fmt.Println("sent message to server:", decoded)
+
+	msg, err = utils.DoDial(conn, decoded)
+	if err != nil {
+		fmt.Println("got empty message from server:", msg)
+		// continue
+	}
+
+	fmt.Println("got message from server:", msg)
 
 	return ""
 }

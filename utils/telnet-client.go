@@ -39,11 +39,11 @@ func DoDial(conn net.Conn, cmd string) (string, error) {
 	return res, nil
 }
 
-func ParseFlag(msg string) (string, error) {
+func ParseFlag(msg string) (string, bool) {
 	matches := flagRegexp.FindAllString(msg, -1)
 	if matches == nil || len(matches) <= 0 {
-		return "", fmt.Errorf("no flags matched")
+		return "", false
 	}
 
-	return matches[0], nil
+	return matches[0], true
 }

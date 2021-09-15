@@ -24,9 +24,9 @@ func NetworkAttacks() string {
 		return fmt.Errorf("network attacks error: %s", err).Error()
 	}
 
-	res, err := utils.ParseFlag(msg)
-	if err != nil {
-		return fmt.Errorf("network attacks error: %s", err).Error()
+	res, found := utils.ParseFlag(msg)
+	if !found {
+		return "network attacks flag not found"
 	}
 
 	return res
